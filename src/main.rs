@@ -1,6 +1,8 @@
+use axum::extract::Query;
 use axum::response::{Html, IntoResponse};
 use axum::routing::get;
 use axum::Router;
+use serde::Deserialize;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
@@ -16,7 +18,13 @@ async fn main() {
     axum::serve(listener, routes).await.unwrap();
 }
 
-async fn handler_hello() -> impl IntoResponse {
-    println!("--> {:<12} - handler_hello", "HANDLER");
-    Html("<strong>Hello World!</strong>")
+#[derive(Debug, Deserialize)]
+struct HelloParams {
+    name: Option<String>,
+}
+
+async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
+    println!("--> {:<12} - handler_hello - {params:?}", "HANDLER");
+    let name = params.name.as_deref().unwrap_or("World!");
+    Html(format!("<strong>Hello {name}</strong>"))
 }
