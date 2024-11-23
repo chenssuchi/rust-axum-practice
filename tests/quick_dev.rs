@@ -26,6 +26,15 @@ async fn quick_dev() -> Result<()> {
 async fn quick_dev_crud() -> Result<()> {
     let hc = httpc_test::new_client("http://localhost:8080")?;
 
+    let req_login = hc.do_post(
+        "/api/login",
+        json!({
+            "username": "alice",
+            "pwd": "welcome"
+        }),
+    );
+    req_login.await?.print().await?;
+
     let req_create_ticket = hc.do_post(
         "/api/tickets",
         json!({
@@ -33,6 +42,7 @@ async fn quick_dev_crud() -> Result<()> {
         }),
     );
     req_create_ticket.await?.print().await?;
+
     hc.do_delete("/api/tickets/1").await?.print().await?;
     hc.do_get("/api/tickets").await?.print().await?;
 
