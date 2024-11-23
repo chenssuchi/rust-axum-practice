@@ -3,6 +3,8 @@ use axum::routing::post;
 use axum::{Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
+use tower_cookies::{Cookie, Cookies};
+use crate::web;
 
 pub fn routes() -> Router {
     Router::new().route("/api/login", post(api_login))
@@ -14,15 +16,18 @@ struct LoginPayload {
     pwd: String,
 }
 
-async fn api_login(payload: Json<LoginPayload>) -> Result<Json<Value>> {
+async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json<Value>> {
     println!("->> {:<12} - api_login", "HANDLER");
 
-    // implement db/auth logic
+    // implement real db/auth logic
     if payload.username != "alice" || payload.pwd != "welcome" {
         return Err(Error::LoginFailed);
     }
 
+    // implement real auth-token generation/signature.
     // set cookies
+    cookies.add(Cookie::new(web::AUTH_TOKEN, "user-1.exp.sign"));
+
     // create the success body
     let body = Json(json!({
         "result": {

@@ -8,6 +8,7 @@ use axum::{middleware, Router};
 use serde::Deserialize;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
+use tower_cookies::CookieManagerLayer;
 use tower_http::services::ServeDir;
 
 #[tokio::main]
@@ -16,6 +17,7 @@ async fn main() {
         .merge(routes_hello())
         .merge(web::routes_login::routes())
         .layer(middleware::map_response(main_response_mapper))
+        .layer(CookieManagerLayer::new())
         .fallback_service(routes_static());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
