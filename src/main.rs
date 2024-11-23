@@ -1,7 +1,10 @@
+mod error;
+mod web;
+
 use axum::extract::{Path, Query};
-use axum::response::{Html, IntoResponse};
+use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, get_service};
-use axum::Router;
+use axum::{middleware, Router};
 use serde::Deserialize;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
@@ -11,6 +14,8 @@ use tower_http::services::ServeDir;
 async fn main() {
     let routes_all = Router::new()
         .merge(routes_hello())
+        .merge(web::routes_login::routes())
+        .layer(middleware::map_response(main_response_mapper))
         .fallback_service(routes_static());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -19,6 +24,12 @@ async fn main() {
     println!("Listening on: {:?}", addr);
 
     axum::serve(listener, routes_all).await.unwrap();
+}
+
+async fn main_response_mapper(res: Response) -> Response {
+    println!("--> {:<12} - main_response_mapper", "RESPONSE_MAPPER");
+    println!();
+    res
 }
 
 fn routes_static() -> Router {
