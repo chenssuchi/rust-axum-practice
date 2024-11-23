@@ -24,9 +24,11 @@ async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json
         return Err(Error::LoginFailed);
     }
 
-    // implement real auth-token generation/signature.
-    // set cookies
-    cookies.add(Cookie::new(web::AUTH_TOKEN, "user-1.exp.sign"));
+    // FIXME: Implement real auth-token generation/signature.
+    let mut cookie = Cookie::new(web::AUTH_TOKEN, "user-1.exp.sign");
+    cookie.set_http_only(true);
+    cookie.set_path("/");
+    cookies.add(cookie);
 
     // create the success body
     let body = Json(json!({
